@@ -1,9 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>Mi web</title>
+  <meta charset="UTF-8">
+  <title>Dashboard Elecciones 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    canvas {
+      max-width: 800px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hola, esta es mi página 🚀</h1>
+
+<h1>📊 Elecciones 2026 - Seguimiento</h1>
+
+<div class="card">
+  <h3>Actas contabilizadas</h3>
+  <p id="actas"></p>
+</div>
+
+<div class="card">
+  <h3>Sánchez</h3>
+  <p id="sanchez"></p>
+</div>
+
+<div class="card">
+  <h3>López</h3>
+  <p id="lopez"></p>
+</div>
+
+<div class="card">
+  <h3>Diferencia</h3>
+  <p id="diferencia"></p>
+</div>
+
+<h2 id="ganador"></h2>
+
+<canvas id="grafico"></canvas>
+
+<script>
+
+// 🔥 AQUÍ CAMBIAS LOS DATOS
+const data = [
+  {actas: 92.992, diff: 7983},
+  {actas: 93.047, diff: 6975},
+  {actas: 93.055, diff: 6783},
+  {actas: 93.056, diff: 6757},
+  {actas: 93.057, diff: 6715},
+  {actas: 93.063, diff: 6517},
+  {actas: 93.096, diff: 5599},
+  {actas: 93.346, diff: 13223}
+];
+
+// Último dato
+const last = data[data.length - 1];
+
+document.getElementById("actas").innerText = last.actas + "%";
+document.getElementById("diferencia").innerText = last.diff + " votos";
+
+// Simulación votos (puedes poner los reales)
+document.getElementById("sanchez").innerText = "1,890,303";
+document.getElementById("lopez").innerText = "1,877,080";
+
+// Ganador actual
+if (last.diff > 0) {
+  document.getElementById("ganador").innerText = "Sánchez va ganando";
+} else {
+  document.getElementById("ganador").innerText = "López va ganando";
+}
+
+// Gráfico
+const ctx = document.getElementById('grafico').getContext('2d');
+
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: data.map(d => d.actas),
+    datasets: [{
+      label: 'Diferencia de votos',
+      data: data.map(d => d.diff),
+      borderWidth: 2
+    }]
+  }
+});
+
+</script>
+
 </body>
 </html>
