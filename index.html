@@ -1,63 +1,82 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard Elecciones 2026</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      text-align: center;
-    }
-    h1 {
-      margin-top: 20px;
-    }
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      margin: 10px;
-      border-radius: 10px;
-      display: inline-block;
-    }
-    canvas {
-      max-width: 800px;
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Dashboard Elecciones 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  text-align: center;
+}
+
+h1 {
+  margin-top: 20px;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #1e293b;
+  padding: 15px;
+  margin: 10px;
+  border-radius: 10px;
+  width: 200px;
+}
+
+.green { color: #22c55e; }
+.red { color: #ef4444; }
+
+canvas {
+  max-width: 900px;
+  margin-top: 20px;
+}
+</style>
 </head>
+
 <body>
 
-<h1>📊 Elecciones 2026 - Seguimiento</h1>
+<h1>📊 Elecciones 2026 - Seguimiento en Vivo</h1>
 
-<div class="card">
-  <h3>Actas contabilizadas</h3>
-  <p id="actas"></p>
+<div class="container">
+  <div class="card">
+    <h3>Actas</h3>
+    <p id="actas"></p>
+  </div>
+
+  <div class="card">
+    <h3>Sánchez</h3>
+    <p id="sanchez"></p>
+  </div>
+
+  <div class="card">
+    <h3>López</h3>
+    <p id="lopez"></p>
+  </div>
+
+  <div class="card">
+    <h3>Diferencia</h3>
+    <p id="diferencia"></p>
+  </div>
 </div>
 
-<div class="card">
-  <h3>Sánchez</h3>
-  <p id="sanchez"></p>
-</div>
-
-<div class="card">
-  <h3>López</h3>
-  <p id="lopez"></p>
-</div>
-
-<div class="card">
-  <h3>Diferencia</h3>
-  <p id="diferencia"></p>
-</div>
-
-<h2 id="ganador"></h2>
+<h2 id="estado"></h2>
+<h3 id="proyeccion"></h3>
 
 <canvas id="grafico"></canvas>
 
 <script>
 
-// 🔥 AQUÍ CAMBIAS LOS DATOS
+// =============================
+// 🔥 DATOS (ACTUALIZA AQUÍ)
+// =============================
 const data = [
   {actas: 92.992, diff: 7983},
   {actas: 93.047, diff: 6975},
@@ -69,24 +88,53 @@ const data = [
   {actas: 93.346, diff: 13223}
 ];
 
-// Último dato
+// Votos reales (puedes actualizar)
+const votosSanchez = 1890303;
+const votosLopez = 1877080;
+
+// =============================
+// 📊 DATOS ACTUALES
+// =============================
 const last = data[data.length - 1];
 
 document.getElementById("actas").innerText = last.actas + "%";
-document.getElementById("diferencia").innerText = last.diff + " votos";
+document.getElementById("diferencia").innerText = last.diff.toLocaleString() + " votos";
+document.getElementById("sanchez").innerText = votosSanchez.toLocaleString();
+document.getElementById("lopez").innerText = votosLopez.toLocaleString();
 
-// Simulación votos (puedes poner los reales)
-document.getElementById("sanchez").innerText = "1,890,303";
-document.getElementById("lopez").innerText = "1,877,080";
-
-// Ganador actual
+// =============================
+// 🧠 QUIÉN VA GANANDO
+// =============================
 if (last.diff > 0) {
-  document.getElementById("ganador").innerText = "Sánchez va ganando";
+  document.getElementById("estado").innerHTML = "🟢 Sánchez va ganando";
 } else {
-  document.getElementById("ganador").innerText = "López va ganando";
+  document.getElementById("estado").innerHTML = "🔴 López va ganando";
 }
 
-// Gráfico
+// =============================
+// 📈 PROYECCIÓN (ESCENARIO MÍNIMO)
+// =============================
+const restante = 100 - last.actas;
+
+// Escenario mínimo razonable
+const ritmo = 2000; // votos por 1%
+const recorte = restante * ritmo;
+
+const resultadoFinal = recorte - last.diff;
+
+let textoProyeccion = "";
+
+if (resultadoFinal > 0) {
+  textoProyeccion = "🔴 Proyección: López podría terminar arriba por " + Math.round(resultadoFinal).toLocaleString() + " votos";
+} else {
+  textoProyeccion = "🟢 Proyección: Sánchez podría mantener ventaja por " + Math.abs(Math.round(resultadoFinal)).toLocaleString() + " votos";
+}
+
+document.getElementById("proyeccion").innerText = textoProyeccion;
+
+// =============================
+// 📉 GRÁFICO
+// =============================
 const ctx = document.getElementById('grafico').getContext('2d');
 
 new Chart(ctx, {
@@ -94,10 +142,20 @@ new Chart(ctx, {
   data: {
     labels: data.map(d => d.actas),
     datasets: [{
-      label: 'Diferencia de votos',
+      label: 'Diferencia de votos (Sánchez - López)',
       data: data.map(d => d.diff),
-      borderWidth: 2
+      borderWidth: 3
     }]
+  },
+  options: {
+    scales: {
+      x: {
+        title: { display: true, text: 'Actas (%)' }
+      },
+      y: {
+        title: { display: true, text: 'Diferencia de votos' }
+      }
+    }
   }
 });
 
